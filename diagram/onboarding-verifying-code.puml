@@ -1,0 +1,45 @@
+@startuml
+start
+#orange/white : 메일 인증 코드 입력;
+note right : 회원ID, 인증코드
+if(회원 상태여부=='REGISTERED_NOT_VERIFIED') then (yes)
+: (Q) 회원 ID에 대한 인증 코드 조회;
+  if(인증코드 있음) then (한개)
+    if(인증코드 유효여부 확인) then (yes)
+      if(인증코드 일치 여부 확인) then (yes)
+      #yellow/palegreen : (U) 인증코드 상태 업데이트;
+      #yellow/palegreen : (U) 유저 상태 업데이트;
+      #palegreen : 정상 처리 안내;
+      end
+      else (no)
+      #pink : 인증 코드가 일치하지 않는다는 안내문구 출력;
+      end
+      endif
+    else (no)
+    #yellow/palegreen : (U) 유저 상태 업데이트;
+    note right : USER_STATUS \n REGISTERED_NOT_VERIFIED\n-> REJECTED_FOR_VERIFICATION_EXPIRATION
+    #pink: 만료된 인증 코드 안내 후 재 가입 유도;
+    end
+    endif
+  elseif (여러개 존재) then (여러개)
+   partition 구체적_프로세스_미정 {
+   #yellow/palegreen : (U) 해당 유저 ID에 대한 모든 인증코드에 대한 상태 변경;
+   #yellow/palegreen : (U) 유저 ID의 상태 변경;
+   floating note right : 이 시점에서 다시 유저가 재가입이 가능하도록\n 혹은 신규 코드를 재발번 하여 재처리가 가능한 상태를 만들어 줘야 될 듯.
+    #pink : 내부 서버 에러로 인한 처리 실패 -> 재처리 유도;
+    end
+    }
+  else (존재하지않음.)
+  partition 구체적_프로세스_미정 {
+  floating note left : 어떤 정책을 정의하느냐에 따라 \n 새로 가입을 유도할 지, 인증코드 재생성을 할지 정하면 될 듯.
+    #yellow/palegreen : (C) 신규 인증번호 생성;
+    #pink: 메일 재확인 후 인증 플로우를 다시 하도록 안내;
+    end
+  }
+  endif
+else (no)
+#pink : 인증 대상이 아니라는 안내 문구 출력;
+endif
+
+end
+@enduml

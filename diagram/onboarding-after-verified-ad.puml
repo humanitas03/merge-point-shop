@@ -1,0 +1,31 @@
+@startuml
+start
+: 유저 로그인 시도;
+if(소셜 로그인여부확인) then (yes)
+: 소셜 로그인 처리;
+    if(condition naver) then (yes)
+    : 네아로 로그인;
+    else (google)
+    : 구글 로그인;
+    endif
+    if((Q)유저상태=='REGISTERED_NOT_VERIFIED') then (yes)
+    #palegreen: 메일 인증 코드 입력 요구;
+    end
+    else (no)
+    partition #yellow/white SNS_로그인_처리 {
+      #blue/white: 로그인 처리 Flow;
+    }
+    end
+    endif
+else (no)
+#orange/white : 일반 로그인 정보 입력;
+note right : 회원아이디 + 비밀번호;
+if((Q)유저상태=='REGISTERED_NOT_VERIFIED') then (yes)
+#palegreen: (Return)메일 인증 코드 입력 요구;
+end
+else (other)
+partition #yellow/white 자체_로그인_처리 {
+  #blue/white: 로그인 처리 Flow;
+}
+end
+@enduml

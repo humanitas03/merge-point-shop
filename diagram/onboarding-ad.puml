@@ -1,0 +1,67 @@
+@startuml
+start
+if(소셜 로그인여부확) then (yes)
+: 소셜 로그인 처리;
+    if(condition naver) then (yes)
+    : 네아로 로그인;
+    else (condition google) then (yes)
+    : 구글 로그인;
+    endif
+
+        if((Q)소셜 가입여부 체크) then (yes)
+        #pink : 안내 문구 호출(이미 가입된 회원);
+        end
+        else (no)
+        partition "**module** 부분 회원 검증 처리" {
+        : 정보 제공 여부 허용 동의 구하기?;
+            if(거절?) then (yes)
+            #pink : 필수 정보제공 미동의로 서비스 이용 종료 안내 후 종료;
+            end
+            else (no)
+            : email, oId, provider 정보 채번\n
+            (해당 정보를 SecurityContext에서 꺼내서 쓸 지,\n
+             다시 Client에서 받아서 처리할지 구체화 필요);
+            : 회원 가입을 위한 추가 정보 수신(주소, 전화번호 등등);
+            : (S) user테이블 에 저장\n
+              (유저 상태 : REGISTERED_NOT_VERIFIED);
+            : Email 검증 코드 생성;
+            : email 검증코드 전송;
+            note right : URL도 같이 던져줘야 되는가...
+            if(전송 성공) then (yes)
+            : email verification 상태 초기화 (코드상태: SENT);
+            else (no)
+            : email verification 상태 초기화 (코드상태 : FAIL_SENT, cause);
+            endif
+            #palegreen : (S) email verification 테이블에 데이터 저장;
+            end
+            endif
+        }
+        endif
+else (no)
+: 신규 회원 여부확인;
+if((Q)기존 가입여부 체크) then (no)
+ partition "**module** 부분 회원 검증 처리" {
+: 정보 제공 여부 허용 동의 구하기?;
+  if(거절?) then (yes)
+  #pink : 필수 정보제공 미동의로 서비스 이용 종료 안내 후 종료;
+  end
+  else (no)
+  : 회원 가입을 위한 모든 정보 채번;
+  : (S) user테이블 에 저장\n
+    (유저 상태 : REGISTERED_NOT_VERIFIED);
+  : Email 검증 코드 생성;
+  : email 검증코드 전송;
+  if(전송 성공) then (yes)
+  : email verification 상태 초기화 (코드상태: SENT);
+  else (no)
+  : email verification 상태 초기화 (코드상태 : FAIL_SENT, cause);
+  endif
+   #palegreen : (S) email verification 테이블에 데이터 저장;
+  end
+  endif
+  }
+else (no)
+#pink : 안내 문구 호출(이미 가입된 회원);
+endif
+end
+@enduml

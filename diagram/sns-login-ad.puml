@@ -1,0 +1,14 @@
+@startuml
+start
+floating note left : 선 논의 사항...\n 1. Email인증 전/후 로 회원 가입된 회원을 어떻게 \n 2. session? or stateless(ex jwt) \n 3. form-login? methodsecurity?
+: 소셜 로그인 처리 요청;
+if(condition naver) then (yes)
+: 네아로 로그인;
+else (condition google) then (yes)
+: 구글 로그인;
+
+
+
+endif
+end
+@enduml
